@@ -285,6 +285,22 @@ bool LiPkg::GetLaserScanData(Points2D& out) {
       std::lock_guard<std::mutex> lg(mutex_lock2_);
       out = laser_scan_data_;
     }
+
+// Truncate or fill with NaN values
+if (out.size() < 456) {
+  const double nan_value = std::numeric_limits<double>::quiet_NaN();
+  size_t current_size = out.size();
+  out.resize(456, PointData(nan_value, nan_value, nan_value, 0));
+  // Set timestamps for the NaN values to 0
+  for (size_t i = current_size; i < 456; ++i) {
+    out[i].stamp = 0;
+  }
+} else if (out.size() > 456) {
+  out.resize(456); // Truncate to 456 points
+}
+
+
+    
     return true;
   } else {
     return false;
